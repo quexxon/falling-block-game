@@ -21,12 +21,12 @@ few days/weeks (2017/05/20).
 
 ## Keybindings
 
-W - Hard Drop
-A - Left
-S - Soft Drop
-D - Right
-J - Rotate Left
-K - Rotate Right
+- W - Hard Drop
+- A - Left
+- S - Soft Drop
+- D - Right
+- J - Rotate Left
+- K - Rotate Right
 
 ## How To Play
 
