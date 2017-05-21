@@ -358,7 +358,15 @@ const STATE = {
   blocks: blocks,
   tetrimino: new Tetrimino(block),
   ghost: new Tetrimino(block, true),
-  dropTime: 500
+  dropTime: 500,
+  completed: {
+    rows: 0,
+    tetris: 0
+  },
+  stats: {
+    rows: null,
+    tetris: null
+  }
 };
 
 function generateBoard() {
@@ -389,6 +397,20 @@ function updateBoard(board, tetrimino) {
     return row.every(block => block.occupied === 1) ? [...acc, i] : acc
   }, []);
 
+  STATE.completed.rows += completedRows.length;
+
+  let stats = completedRows.reduce((acc, n) => {
+    if ( acc.prev + 1 === n ) {
+      if (acc.sequence + 1 === 3) {
+        return Object.assign({}, acc, { prev: n, sequence: 0, tetris: acc.tetris + 1 });
+      }
+      return Object.assign({}, acc, { prev: n, sequence: acc.sequence + 1 });
+    }
+    return Object.assign({}, acc, { prev: n, sequence: 0 });
+  }, { prev: 0, sequence: 0, tetris: 0 });
+
+  STATE.completed.tetris += stats.tetris;
+
   board = completedRows.reduce((acc, i) => {
     return [
       (new Array(10)).fill(0), 
@@ -397,7 +419,14 @@ function updateBoard(board, tetrimino) {
     ];
   }, board);
 
+  updateStats();
+
   return board;
+}
+
+function updateStats() {
+  STATE.stats.rows.textContent = STATE.completed.rows;
+  STATE.stats.tetris.textContent = STATE.completed.tetris;
 }
 
 function mainLoop(now) {
@@ -571,6 +600,8 @@ function main() {
   STATE.pctx = preview.getContext('2d');
   STATE.img.src = "img/tetriminos.png";
   STATE.ghost.hardDrop(STATE.board);
+  STATE.stats.rows = document.getElementById('1-row-count');
+  STATE.stats.tetris = document.getElementById('4-row-count');
 
   document.addEventListener('keydown', keyDownHandling);
   document.addEventListener('keyup', keyUpHandling);

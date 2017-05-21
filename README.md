@@ -11,7 +11,7 @@ few days/weeks (2017/05/20).
 * ~~Ghost block~~
 * ~~Distinct colors for different shaped blocks~~
 * Multiple levels with increasing speed
-* Completed row counts
+* ~~Completed row counts~~
 * Game over notification
 * Start screen
 * Pause

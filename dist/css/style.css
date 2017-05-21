@@ -22,3 +22,6 @@ body {
   right: 10rem;
   background: #000;
 }
+#stats {
+  font-size: 1.6rem;
+}
