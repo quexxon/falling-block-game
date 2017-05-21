@@ -22,6 +22,14 @@ export class Tetrimino {
     return collision;
   }
 
+  hardDrop(board) {
+    let collision;
+
+    do {
+      collision = this.moveDown(board);
+    } while (!collision);
+  }
+
   moveLeft(board) {
     let newCoords = {x: this.x - 1, y: this.y};
 

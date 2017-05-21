@@ -280,6 +280,14 @@ class Tetrimino {
     return collision;
   }
 
+  hardDrop(board) {
+    let collision;
+
+    do {
+      collision = this.moveDown(board);
+    } while (!collision);
+  }
+
   moveLeft(board) {
     let newCoords = {x: this.x - 1, y: this.y};
 
@@ -340,13 +348,16 @@ let block = blocks.pop();
 
 const STATE = {
   board: generateBoard(),
-  canvas: document.getElementById('canvas'),
-  ctx: canvas.getContext('2d'),
+  canvas: null,
+  preview: null,
+  ctx: null,
+  pctx: null,
   img: new Image(),
   start: 0,
   accruedTime: 0,
   blocks: blocks,
   tetrimino: new Tetrimino(block),
+  ghost: new Tetrimino(block, true),
   dropTime: 500
 };
 
@@ -424,20 +435,44 @@ function drawBoard() {
   });
 }
 
-function drawTetrimino() {
-  let rows = STATE.tetrimino.rotations[STATE.tetrimino.rotation];
+function drawTetrimino(tetrimino) {
+  let rows = tetrimino.rotations[STATE.tetrimino.rotation];
 
   rows.forEach((row, rowIndex) => {
     row.forEach((block, columnIndex) => {
       if ( block === 1 ) {
         STATE.ctx.drawImage(
           STATE.img, 
-          32 * STATE.tetrimino.color,
+          32 * tetrimino.color,
           0,
           32,
           32,
-          (STATE.tetrimino.x * 32) + (columnIndex * 32), 
-          (STATE.tetrimino.y * 32) + (rowIndex * 32),
+          (tetrimino.x * 32) + (columnIndex * 32), 
+          (tetrimino.y * 32) + (rowIndex * 32),
+          32,
+          32
+        );
+      }
+    });
+  });
+}
+
+function drawPreview(tetrimino) {
+  STATE.pctx.clearRect(0, 0, STATE.preview.width, STATE.preview.height);
+
+  let rows = tetrimino.rotations[0];
+
+  rows.forEach((row, rowIndex) => {
+    row.forEach((block, columnIndex) => {
+      if ( block === 1 ) {
+        STATE.pctx.drawImage(
+          STATE.img, 
+          32 * tetrimino.color,
+          0,
+          32,
+          32,
+          columnIndex * 32, 
+          rowIndex * 32,
           32,
           32
         );
@@ -452,56 +487,63 @@ function update() {
   STATE.start = 0;
 
   if (collision) {
+    let block = STATE.blocks.pop();
+
     STATE.board = updateBoard(STATE.board, STATE.tetrimino);
+    STATE.tetrimino = new Tetrimino(block);
+    STATE.ghost = new Tetrimino(block);
+    STATE.ghost.hardDrop(STATE.board);
 
-    if (STATE.blocks.length === 0) {
+    if (STATE.blocks.length === 1) {
       let blocks = shuffle(BLOCKS$1);
-      let block = blocks.pop();
-
-      STATE.blocks = blocks;
-      STATE.tetrimino = new Tetrimino(block, block.origin[0], block.origin[1]);
-    } else {
-      let block = STATE.blocks.pop();
-
-      STATE.tetrimino = new Tetrimino(block, block.origin[0], block.origin[1]);
+      STATE.blocks = [...blocks, ...STATE.blocks];
     }
   }
 }
 
-function hardDrop() {
-  let collision;
-
-  do {
-    collision = STATE.tetrimino.moveDown(STATE.board);
-  } while (!collision);
-}
 
 function animate() {
+  let nextTetrimino = STATE.blocks[STATE.blocks.length - 1];
+
   STATE.ctx.clearRect(0, 0, STATE.canvas.width, STATE.canvas.height);
   drawBoard();
-  drawTetrimino();
+  STATE.ctx.globalAlpha = 0.25;
+  drawTetrimino(STATE.ghost);
+  STATE.ctx.globalAlpha = 1.0;
+  drawTetrimino(STATE.tetrimino);
+  drawPreview(nextTetrimino);
 }
 
 function keyDownHandling(e) {
   switch (e.key) {
     case 'a':
       STATE.tetrimino.moveLeft(STATE.board);
+      STATE.ghost.setPosition(STATE.tetrimino.x, STATE.tetrimino.y);
+      STATE.ghost.hardDrop(STATE.board);
       break;
 
     case 'd':
       STATE.tetrimino.moveRight(STATE.board);
+      STATE.ghost.setPosition(STATE.tetrimino.x, STATE.tetrimino.y);
+      STATE.ghost.hardDrop(STATE.board);
       break;
 
     case 'j':
+      STATE.ghost.setPosition(STATE.tetrimino.x, STATE.tetrimino.y);
       STATE.tetrimino.rotateLeft(STATE.board);
+      STATE.ghost.rotateLeft(STATE.board);
+      STATE.ghost.hardDrop(STATE.board);
       break;
 
     case 'k':
+      STATE.ghost.setPosition(STATE.tetrimino.x, STATE.tetrimino.y);
       STATE.tetrimino.rotateRight(STATE.board);
+      STATE.ghost.rotateRight(STATE.board);
+      STATE.ghost.hardDrop(STATE.board);
       break;
 
     case 'w':
-      hardDrop();
+      STATE.tetrimino.hardDrop(STATE.board);
       break;
 
     case 's':
@@ -520,10 +562,19 @@ function keyUpHandling(e) {
 }
 
 function main() {
-  STATE.img.src = "img/tetrominos.png";
+  let canvas = document.getElementById('canvas');
+  let preview = document.getElementById('preview');
+
+  STATE.canvas = canvas;
+  STATE.preview = preview;
+  STATE.ctx = canvas.getContext('2d');
+  STATE.pctx = preview.getContext('2d');
+  STATE.img.src = "img/tetriminos.png";
+  STATE.ghost.hardDrop(STATE.board);
 
   document.addEventListener('keydown', keyDownHandling);
   document.addEventListener('keyup', keyUpHandling);
+
   requestAnimationFrame(mainLoop);
 }
 
