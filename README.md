@@ -8,6 +8,7 @@ few days/weeks (2017/05/20).
 ## Missing Features
 
 * Next block preview
+* Ghost block
 * ~~Distinct colors for different shaped blocks~~
 * Multiple levels with increasing speed
 * Completed row counts
