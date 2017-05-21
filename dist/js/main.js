@@ -61,7 +61,16 @@ var timer = new Timer();
   main();
 })();
 
+const BRIGHT_BLUE = 0;
+const YELLOW = 1;
+const BRIGHT_GREEN = 2;
+const BLUE = 3;
+const PURPLE = 4;
+const GREEN = 5;
+const SALMON = 6;
+
 const I_BLOCK = {
+  color: BRIGHT_BLUE,
   origin: [3, -1],
   rotations: [
     [
@@ -92,6 +101,7 @@ const I_BLOCK = {
 };
 
 const S_BLOCK = {
+  color: YELLOW,
   origin: [3, 0],
   rotations: [
     [
@@ -118,6 +128,7 @@ const S_BLOCK = {
 };
 
 const Z_BLOCK = {
+  color: BLUE,
   origin: [3, 0],
   rotations: [
     [
@@ -144,6 +155,7 @@ const Z_BLOCK = {
 };
 
 const T_BLOCK = { 
+  color: PURPLE,
   origin: [3, 0],
   rotations: [
     [
@@ -170,6 +182,7 @@ const T_BLOCK = {
 };
 
 const J_BLOCK = { 
+  color: GREEN,
   origin: [3, 0],
   rotations: [
     [
@@ -196,6 +209,7 @@ const J_BLOCK = {
 };
 
 const L_BLOCK = { 
+  color: SALMON,
   origin: [3, -1],
   rotations: [
     [
@@ -222,6 +236,7 @@ const L_BLOCK = {
 };
 
 const O_BLOCK = {
+  color: BRIGHT_GREEN,
   origin: [4, 0],
   rotations: [
     [
@@ -242,11 +257,12 @@ const BLOCKS$1 = [
 ];
 
 class Tetrimino {
-  constructor(block, x = 0, y = 0) {
+  constructor(block) {
     this.origin = block.origin;
     this.rotations = block.rotations;
-    this.x = x;
-    this.y = y;
+    this.x = block.origin[0];
+    this.y = block.origin[1];
+    this.color = block.color;
     this.rotation = 0;
   }
 
@@ -298,15 +314,15 @@ class Tetrimino {
 
   isCollision(coords, rotation, board) {
     return this.rotations[rotation].reduce((acc, row, y) => {
-      return acc || row.reduce((acc, cell, x) => {
-        if (cell === 1) {
+      return acc || row.reduce((acc, block, x) => {
+        if (block === 1) {
           if ((coords.x + x) < 0) {
             return acc || true;
           } else if ((coords.x + x) === 10) {
             return acc || true;
           } else if ((coords.y + y) === 20) {
             return acc || true;
-          } else if (board[coords.y + y][coords.x + x] === 1) {
+          } else if (board[coords.y + y][coords.x + x].occupied === 1) {
             return acc || true;
           } else {
             return acc || false;
@@ -330,7 +346,7 @@ const STATE = {
   start: 0,
   accruedTime: 0,
   blocks: blocks,
-  tetrimino: new Tetrimino(block, block.origin[0], block.origin[1]),
+  tetrimino: new Tetrimino(block),
   dropTime: 500
 };
 
@@ -340,7 +356,7 @@ function generateBoard() {
   for (let y = 0; y < 20; y++) {
     board[y] = [];
     for (let x = 0; x < 10; x++) {
-      board[y][x] = 0;
+      board[y][x] = { occupied: 0 };
     }
   }
 
@@ -351,13 +367,15 @@ function updateBoard(board, tetrimino) {
   tetrimino.rotations[tetrimino.rotation].forEach((row, yOffset) => {
     row.forEach((cell, xOffset) => {
       if (cell === 1) {
-        board[tetrimino.y + yOffset][tetrimino.x + xOffset] = 1;
+        let block = { color: tetrimino.color, occupied: 1 };
+
+        board[tetrimino.y + yOffset][tetrimino.x + xOffset] = block;
       }
     });
   });
 
   let completedRows = board.reduce((acc, row, i) => { 
-    return row.every(block => block === 1) ? [...acc, i] : acc
+    return row.every(block => block.occupied === 1) ? [...acc, i] : acc
   }, []);
 
   board = completedRows.reduce((acc, i) => {
@@ -389,11 +407,17 @@ function mainLoop(now) {
 function drawBoard() {
   STATE.board.forEach((row, rowIndex) => {
     row.forEach((block, columnIndex) => {
-      if ( block === 1 ) {
+      if ( block.occupied === 1 ) {
         STATE.ctx.drawImage(
           STATE.img,
+          32 * block.color,
+          0,
+          32,
+          32,
           columnIndex * 32,
-          rowIndex * 32
+          rowIndex * 32,
+          32,
+          32
         );
       }
     });
@@ -408,8 +432,14 @@ function drawTetrimino() {
       if ( block === 1 ) {
         STATE.ctx.drawImage(
           STATE.img, 
+          32 * STATE.tetrimino.color,
+          0,
+          32,
+          32,
           (STATE.tetrimino.x * 32) + (columnIndex * 32), 
-          (STATE.tetrimino.y * 32) + (rowIndex * 32)
+          (STATE.tetrimino.y * 32) + (rowIndex * 32),
+          32,
+          32
         );
       }
     });
@@ -490,7 +520,7 @@ function keyUpHandling(e) {
 }
 
 function main() {
-  STATE.img.src = "img/Blue Blok.png";
+  STATE.img.src = "img/tetrominos.png";
 
   document.addEventListener('keydown', keyDownHandling);
   document.addEventListener('keyup', keyUpHandling);

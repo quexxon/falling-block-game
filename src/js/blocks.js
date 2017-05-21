@@ -1,6 +1,15 @@
 export default BLOCKS;
 
+const BRIGHT_BLUE = 0;
+const YELLOW = 1;
+const BRIGHT_GREEN = 2;
+const BLUE = 3;
+const PURPLE = 4;
+const GREEN = 5;
+const SALMON = 6;
+
 const I_BLOCK = {
+  color: BRIGHT_BLUE,
   origin: [3, -1],
   rotations: [
     [
@@ -31,6 +40,7 @@ const I_BLOCK = {
 };
 
 const S_BLOCK = {
+  color: YELLOW,
   origin: [3, 0],
   rotations: [
     [
@@ -57,6 +67,7 @@ const S_BLOCK = {
 };
 
 const Z_BLOCK = {
+  color: BLUE,
   origin: [3, 0],
   rotations: [
     [
@@ -83,6 +94,7 @@ const Z_BLOCK = {
 };
 
 const T_BLOCK = { 
+  color: PURPLE,
   origin: [3, 0],
   rotations: [
     [
@@ -109,6 +121,7 @@ const T_BLOCK = {
 };
 
 const J_BLOCK = { 
+  color: GREEN,
   origin: [3, 0],
   rotations: [
     [
@@ -135,6 +148,7 @@ const J_BLOCK = {
 };
 
 const L_BLOCK = { 
+  color: SALMON,
   origin: [3, -1],
   rotations: [
     [
@@ -161,6 +175,7 @@ const L_BLOCK = {
 };
 
 const O_BLOCK = {
+  color: BRIGHT_GREEN,
   origin: [4, 0],
   rotations: [
     [

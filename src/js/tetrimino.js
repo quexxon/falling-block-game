@@ -1,9 +1,10 @@
 export class Tetrimino {
-  constructor(block, x = 0, y = 0) {
+  constructor(block) {
     this.origin = block.origin;
     this.rotations = block.rotations;
-    this.x = x;
-    this.y = y;
+    this.x = block.origin[0];
+    this.y = block.origin[1];
+    this.color = block.color;
     this.rotation = 0;
   }
 
@@ -55,15 +56,15 @@ export class Tetrimino {
 
   isCollision(coords, rotation, board) {
     return this.rotations[rotation].reduce((acc, row, y) => {
-      return acc || row.reduce((acc, cell, x) => {
-        if (cell === 1) {
+      return acc || row.reduce((acc, block, x) => {
+        if (block === 1) {
           if ((coords.x + x) < 0) {
             return acc || true;
           } else if ((coords.x + x) === 10) {
             return acc || true;
           } else if ((coords.y + y) === 20) {
             return acc || true;
-          } else if (board[coords.y + y][coords.x + x] === 1) {
+          } else if (board[coords.y + y][coords.x + x].occupied === 1) {
             return acc || true;
           } else {
             return acc || false;

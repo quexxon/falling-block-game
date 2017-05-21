@@ -13,7 +13,7 @@ const STATE = {
   start: 0,
   accruedTime: 0,
   blocks: blocks,
-  tetrimino: new Tetrimino(block, block.origin[0], block.origin[1]),
+  tetrimino: new Tetrimino(block),
   dropTime: 500
 };
 
@@ -23,7 +23,7 @@ function generateBoard() {
   for (let y = 0; y < 20; y++) {
     board[y] = [];
     for (let x = 0; x < 10; x++) {
-      board[y][x] = 0;
+      board[y][x] = { occupied: 0 };
     }
   }
 
@@ -34,13 +34,15 @@ function updateBoard(board, tetrimino) {
   tetrimino.rotations[tetrimino.rotation].forEach((row, yOffset) => {
     row.forEach((cell, xOffset) => {
       if (cell === 1) {
-        board[tetrimino.y + yOffset][tetrimino.x + xOffset] = 1;
+        let block = { color: tetrimino.color, occupied: 1 };
+
+        board[tetrimino.y + yOffset][tetrimino.x + xOffset] = block;
       }
     });
   });
 
   let completedRows = board.reduce((acc, row, i) => { 
-    return row.every(block => block === 1) ? [...acc, i] : acc
+    return row.every(block => block.occupied === 1) ? [...acc, i] : acc
   }, []);
 
   board = completedRows.reduce((acc, i) => {
@@ -72,11 +74,17 @@ function mainLoop(now) {
 function drawBoard() {
   STATE.board.forEach((row, rowIndex) => {
     row.forEach((block, columnIndex) => {
-      if ( block === 1 ) {
+      if ( block.occupied === 1 ) {
         STATE.ctx.drawImage(
           STATE.img,
+          32 * block.color,
+          0,
+          32,
+          32,
           columnIndex * 32,
-          rowIndex * 32
+          rowIndex * 32,
+          32,
+          32
         );
       }
     });
@@ -91,8 +99,14 @@ function drawTetrimino() {
       if ( block === 1 ) {
         STATE.ctx.drawImage(
           STATE.img, 
+          32 * STATE.tetrimino.color,
+          0,
+          32,
+          32,
           (STATE.tetrimino.x * 32) + (columnIndex * 32), 
-          (STATE.tetrimino.y * 32) + (rowIndex * 32)
+          (STATE.tetrimino.y * 32) + (rowIndex * 32),
+          32,
+          32
         );
       }
     });
@@ -173,7 +187,7 @@ function keyUpHandling(e) {
 }
 
 function main() {
-  STATE.img.src = "img/Blue Blok.png"
+  STATE.img.src = "img/tetrominos.png"
 
   document.addEventListener('keydown', keyDownHandling);
   document.addEventListener('keyup', keyUpHandling);
